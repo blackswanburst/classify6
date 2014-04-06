@@ -5,8 +5,7 @@ open String;;
 open List;;
 
 let expand l = match l with
-(*Expand 8*)
-	| [] -> ["";"";"";"";"";"";"";""]
+(*Expand 8 is an empty string so let last case catch it*)
 (*Expand 7 cases*)
 	| [""; x] -> ["";"";"";"";"";"";"";x]
 	| [x; ""] -> [x;"";"";"";"";"";"";""]
@@ -52,7 +51,7 @@ let expand l = match l with
 (*Already Expanded*)
 	| [a;b;c;d;e;f;g;h] -> [a;b;c;d;e;f;g;h]
 (*This will catch lists that are too long, or generally seem like garbage*)
-	| _ -> ["*"];;
+	| _ -> ["****"];;
 
 (*Reconstruct the string from the list and insert colons*)
 let stringify l = String.concat ":" l;;

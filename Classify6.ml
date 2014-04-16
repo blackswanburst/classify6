@@ -54,7 +54,7 @@ let expand l = match l with
 	| _ -> ["****"];;
 
 (*Reconstruct the string from the list and insert colons*)
-let stringify l = String.concat ":" l;;
+let list_to_string l = String.concat ":" l;;
 
 (*a function which pads a string with leading zeroes up to length 4*)
 let rec pad_zero x = if (String.length x) >= 4 then x else pad_zero ("0" ^ x);;
@@ -64,7 +64,22 @@ let expand s =
 	let l = Str.split (Str.regexp ":") uc in
 	let res = expand l in 
 	let last = List.map pad_zero res in
-	stringify last;;
+	list_to_string last;;
+
+let bin_of_int d =
+  if d < 0 then invalid_arg "bin_of_int" else
+  if d = 0 then "0" else
+  let rec aux acc d =
+    if d = 0 then acc else
+    aux (string_of_int (d land 1) :: acc) (d lsr 1)
+  in
+  String.concat "" (aux [] d);;
+
+(*This function bitflips a char, but outputs a string for ease of use in the next function*)
+let bit_flip x = if x = '0' then "1" else "0";;
+
+(*This function takes a binary string, and returns a copy with the bit at pos flipped*)
+let flip_pos str pos = (String.sub str 0 (pos-1)) ^ bit_flip str.[pos] ^ (String.sub str (pos+1) ((String.length str)-(pos+1)));;
 
 (*TODO: Write mac extraction function*)
 (*let x = Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]") in Str.string_match x "2001:0DB8:0001:0002:020C:29FF:FE0C:47D5" 20;;*)

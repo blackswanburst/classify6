@@ -78,11 +78,38 @@ let bin_of_int d =
 (*This function bitflips a char, but outputs a string for ease of use in the next function*)
 let bit_flip x = if x = '0' then "1" else "0";;
 
-(*This function takes a binary string, and returns a copy with the bit at pos flipped*)
-let flip_pos str pos = (String.sub str 0 (pos-1)) ^ bit_flip str.[pos] ^ (String.sub str (pos+1) ((String.length str)-(pos+1)));;
+(*This function takes a binary string, and returns a copy with the correct bit flipped (Endianess ;)*)
+let flip_bit str = (String.sub str 0 1) ^ bit_flip str.[3] ^ (String.sub str 2 6);;
+
+(*Function to make a binary string from a hex string*)
+let bin_string x = bin_of_int (int_of_string("0x" ^ x))
+
+let flip_n_hex x = Printf.sprintf "%04X" (int_of_string ("0b" ^ (flip_bit (bin_string x))));;
+
+(* a string of length 4 is split into two strings of length 2 and put into a list*)
+let string_split str = String.sub str 0 2 ::  String.sub str 2 2 ::[];;
+
+(*Split all the strings in the list and assemble them back into a new list*)
+let rec divide_list lst = match lst with
+| [] -> []
+| h :: t -> (string_split h) @ divide_list t;;
+
+let list_and_bitflip x = let y = Str.split (Str.regexp ":") x in match y with
+| h :: t -> (flip_n_hex h) :: t
+| _ -> [];;
+
+let filter str = if str = "FE" || str = "FF" then false else true;;
 
 (*TODO: Write mac extraction function*)
 (*let x = Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]") in Str.string_match x "2001:0DB8:0001:0002:020C:29FF:FE0C:47D5" 20;;*)
+let extract_mac eui_64 = if (Str.string_match (Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]")) eui_64 20) 
+then
+let lst = list_and_bitflip (Str.matched_string eui_64) in
+let new_lst = divide_list lst in
+let ans = List.filter filter new_lst in
+String.concat ":" ans
+else
+"not discernable from this address.\n";;
 
 (*A 64-bit interface identifier is most commonly derived from its 48-bit MAC address. A MAC address 00:0C:29:0C:47:D5 is turned into a 64-bit EUI-64 by inserting FF:FE in the middle: 
 	00:0C:29:FF:FE:0C:47:D5. When this EUI-64 is used to form an IPv6 address it is modified:[1] the meaning of the Universal/Local bit (the 7th most significant bit of the EUI-64, starting 
@@ -104,7 +131,7 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"
 	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> Printf.printf "This is a 6 to 4 address. \n Write another function to extract IPv4. \n"
 	| addy when Str.string_match (Str.regexp "^[2-3][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global unicast address. You should be able to use whois for these. \n(RFC 3587) \n"
-	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> Printf.printf "Link Local addresses, should not be forwarded by routers. \nFinish Writing MAC extraction function. \n"
+	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> Printf.printf "Link Local addresses, should not be forwarded by routers. The mac address is %s \n" (extract_mac addy)
 	| addy when Str.string_match (Str.regexp "^FC[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Unique local addresses, routable only in cooperating sites. \n(RFC 4193) \n"
 	| addy when Str.string_match (Str.regexp "^FD[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Probabilistically unique local addresses, routable only in cooperating sites. \n(RFC 4193 section 3.2) \n"
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global multicast address. \n"

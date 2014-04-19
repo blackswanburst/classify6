@@ -78,7 +78,7 @@ let bin_of_int d =
 (*This function bitflips a char, but outputs a string for ease of use in the next function*)
 let bit_flip x = if x = '0' then "1" else "0";;
 
-(*This function takes a binary string, and returns a copy with the correct bit flipped (Endianess ;)*)
+(*This function takes a binary string, and returns a copy with the correct bit flipped (Big Endian)*)
 let flip_bit str = (String.sub str 0 1) ^ bit_flip str.[3] ^ (String.sub str 2 6);;
 
 (*Function to make a binary string from a hex string*)
@@ -116,6 +116,17 @@ else
 	from 1) is inverted, so that a 1 now means Universal. To create an IPv6 address with the network prefix 2001:db8:1:2::/64 it yields the address 2001:db8:1:2:020c:29ff:fe0c:47d5 (with the 
 	underlined U/L bit inverted to a 1, because the MAC address is universally unique).*)
 
+let rec dec_list lst = match lst with
+| [] -> []
+| h :: t -> (string_of_int (int_of_string ("0x" ^ h))) :: dec_list t;;
+
+(*extract Server IPv4 Addresses from Teredo*)
+let extract_server addy = Str.string_match (Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]")) addy 10;
+let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
+let hex = divide_list lst in
+let declst = dec_list hex in
+String.concat "." declst;;
+
 (*Classify the address*)
 let classify s =
 	let uc = (String.uppercase s) in
@@ -131,7 +142,7 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"
 	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> Printf.printf "This is a 6 to 4 address. \n Write another function to extract IPv4. \n"
 	| addy when Str.string_match (Str.regexp "^[2-3][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global unicast address. You should be able to use whois for these. \n(RFC 3587) \n"
-	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> Printf.printf "Link Local addresses, should not be forwarded by routers. The mac address is %s \n" (extract_mac addy)
+	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> Printf.printf "Link Local addresses, should not be forwarded by routers. The associated mac address is %s \n" (extract_mac addy)
 	| addy when Str.string_match (Str.regexp "^FC[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Unique local addresses, routable only in cooperating sites. \n(RFC 4193) \n"
 	| addy when Str.string_match (Str.regexp "^FD[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Probabilistically unique local addresses, routable only in cooperating sites. \n(RFC 4193 section 3.2) \n"
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global multicast address. \n"

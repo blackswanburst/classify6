@@ -1,3 +1,18 @@
+(*	Copyright 2014 Eireann Leverett 
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.*)
+
 (*Load necessary modules*)
 open Printf;;
 open Sys;;
@@ -59,6 +74,7 @@ let list_to_string l = String.concat ":" l;;
 (*a function which pads a string with leading zeroes up to length 4*)
 let rec pad_zero x = if (String.length x) >= 4 then x else pad_zero ("0" ^ x);;
 
+(*Preprocess the address by capitolising strings, adding leading zeros if they're missing, expandin compressed addresses, etc*)
 let expand s = 
 	let uc = (String.uppercase s) in
 	let l = Str.split (Str.regexp ":") uc in
@@ -66,6 +82,7 @@ let expand s =
 	let last = List.map pad_zero res in
 	list_to_string last;;
 
+(*Return a binary string from an int (MSB)*)
 let bin_of_int d =
   if d < 0 then invalid_arg "bin_of_int" else
   if d = 0 then "0" else
@@ -84,6 +101,7 @@ let flip_bit str = (String.sub str 0 1) ^ bit_flip str.[3] ^ (String.sub str 2 6
 (*Function to make a binary string from a hex string*)
 let bin_string x = bin_of_int (int_of_string("0x" ^ x))
 
+(* Convert hex string to binary string via ints, then flip the bit and return the result as a hex string again*)
 let flip_n_hex x = Printf.sprintf "%04X" (int_of_string ("0b" ^ (flip_bit (bin_string x))));;
 
 (* a string of length 4 is split into two strings of length 2 and put into a list*)
@@ -94,14 +112,15 @@ let rec divide_list lst = match lst with
 | [] -> []
 | h :: t -> (string_split h) @ divide_list t;;
 
+(*turn into a list, and perform the magic extraction (requires some bitflipping) of the MAC on the first group*)
 let list_and_bitflip x = let y = Str.split (Str.regexp ":") x in match y with
 | h :: t -> (flip_n_hex h) :: t
 | _ -> [];;
 
+(*filter out the FE:FF part of the string from a list*)
 let filter str = if str = "FE" || str = "FF" then false else true;;
 
-(*TODO: Write mac extraction function*)
-(*let x = Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]") in Str.string_match x "2001:0DB8:0001:0002:020C:29FF:FE0C:47D5" 20;;*)
+(* Function to extract and print the MAC address from an EUI-64 address*)
 let extract_mac eui_64 = if (Str.string_match (Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]")) eui_64 20) 
 then
 let lst = list_and_bitflip (Str.matched_string eui_64) in
@@ -116,6 +135,7 @@ else
 	from 1) is inverted, so that a 1 now means Universal. To create an IPv6 address with the network prefix 2001:db8:1:2::/64 it yields the address 2001:db8:1:2:020c:29ff:fe0c:47d5 (with the 
 	underlined U/L bit inverted to a 1, because the MAC address is universally unique).*)
 
+(* Turn a list of hex strings into their decimal equivalent*)
 let rec dec_list lst = match lst with
 | [] -> []
 | h :: t -> (string_of_int (int_of_string ("0x" ^ h))) :: dec_list t;;
@@ -136,7 +156,7 @@ let classify s =
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> Printf.printf "This is the unspecified address, used for applications that do not yet know their host address. \n"
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> Printf.printf "This is the loopback address, used to route packets to the on the same host. \n"
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038) \n"
-	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6.\nAdd further functions to extract IPv4 address. \n"
+	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6.\n The server address is %s. Add further function to extract the IPv4 address. \n" (extract_server addy)
 	| addy when Str.string_match (Str.regexp "^2001:0002:") addy 0 -> Printf.printf "This is a benchmarking address. It should only be used in documentation and shouldn't be routable. \n"
 	| addy when Str.string_match (Str.regexp "^2001:001[0-9A-F]:") addy 0 -> Printf.printf "This is an ORCHID address. These addresses are used for a fixed-term experiment. \nThey should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses. \n"
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"

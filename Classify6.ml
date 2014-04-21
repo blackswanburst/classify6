@@ -141,11 +141,19 @@ let rec dec_list lst = match lst with
 | h :: t -> (string_of_int (int_of_string ("0x" ^ h))) :: dec_list t;;
 
 (*extract Server IPv4 Addresses from Teredo*)
-let extract_server addy = Str.string_match (Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]")) addy 10;
+let extract_server addy = Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 10;
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let hex = divide_list lst in
 let declst = dec_list hex in
 String.concat "." declst;;
+
+(*Extract Client IPv4 Address and port*)
+(* TODO split the string into two char chunks, then concatanate with a .*)
+let extract_client addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 30;
+let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
+let ob_client = String.concat "" lst in
+Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client)));;
+
 
 (*Classify the address*)
 let classify s =

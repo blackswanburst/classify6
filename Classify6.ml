@@ -121,7 +121,7 @@ let list_and_bitflip x = let y = Str.split (Str.regexp ":") x in match y with
 let filter str = if str = "FE" || str = "FF" then false else true;;
 
 (* Function to extract and print the MAC address from an EUI-64 address*)
-let extract_mac eui_64 = if (Str.string_match (Str.regexp("[0-9A-E][0-9A-E][0-9A-E][0-9A-E]:[0-9A-E][0-9A-E]FF:FE[0-9A-E][0-9A-E]:[0-9A-E][0-9A-E][0-9A-E][0-9A-E]")) eui_64 20) 
+let extract_mac eui_64 = if (Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F]FF:FE[0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) eui_64 20) 
 then
 let lst = list_and_bitflip (Str.matched_string eui_64) in
 let new_lst = divide_list lst in

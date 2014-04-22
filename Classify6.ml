@@ -177,7 +177,7 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^FC[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Unique local addresses, routable only in cooperating sites. \n(RFC 4193) \n"
 	| addy when Str.string_match (Str.regexp "^FD[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Probabilistically unique local addresses, routable only in cooperating sites. \n(RFC 4193 section 3.2) \n"
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global multicast address. \n"
-	| _ -> Printf.printf "This address is not recognised %s \n please contact the eireann.leverett@cantab.net with these details so he can improve the code. \n" addy;;
+	| _ -> Printf.printf "This address is not recognised %s \n please contact eireann.leverett@cantab.net with these details so he can improve the code. \n" addy;;
 print_string "Enter an IPV6 address: ";
 let addy = read_line () in
     classify addy;;

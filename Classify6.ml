@@ -157,6 +157,9 @@ let long = Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string
 pretty_print long;;
 
 (*Todo extract port from Teredo address*)
+let extract_port addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 25;
+let ob_port = Str.matched_string addy in
+Printf.sprintf "%n" ((int_of_string "0xFFFF") lxor (int_of_string ("0x" ^ ob_port)));;
 
 (*Classify the address*)
 let classify s =
@@ -167,7 +170,8 @@ let classify s =
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> Printf.printf "This is the unspecified address, used for applications that do not yet know their host address. \n"
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> Printf.printf "This is the loopback address, used to route packets to the on the same host. \n"
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038) \n"
-	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6.\n The server address is %s. The IPv4 client address is %s. \n" (extract_server addy) (extract_client addy)
+	(* 0403 case needs to go here *) 
+	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6. \nThe server address is %s. The IPv4 client address is %s and the port is %s. \n" (extract_server addy) (extract_client addy) (extract_port addy)
 	| addy when Str.string_match (Str.regexp "^2001:0002:") addy 0 -> Printf.printf "This is a benchmarking address. It should only be used in documentation and shouldn't be routable. \n"
 	| addy when Str.string_match (Str.regexp "^2001:001[0-9A-F]:") addy 0 -> Printf.printf "This is an ORCHID address. These addresses are used for a fixed-term experiment. \nThey should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses. \n"
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"

@@ -156,10 +156,17 @@ let ob_client = String.concat "" lst in
 let long = Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client))) in
 pretty_print long;;
 
-(*Todo extract port from Teredo address*)
+(*Extract port from Teredo address*)
 let extract_port addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 25;
 let ob_port = Str.matched_string addy in
 Printf.sprintf "%n" ((int_of_string "0xFFFF") lxor (int_of_string ("0x" ^ ob_port)));;
+
+(*Extract IPv4 host address from 6 to 4 addresses *)
+let extract_host addy = Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 5;
+let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
+let hex = divide_list lst in
+let declst = dec_list hex in
+String.concat "." declst;;
 
 (*Classify the address*)
 let classify s =
@@ -175,7 +182,7 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^2001:0002:") addy 0 -> Printf.printf "This is a benchmarking address. It should only be used in documentation and shouldn't be routable. \n"
 	| addy when Str.string_match (Str.regexp "^2001:001[0-9A-F]:") addy 0 -> Printf.printf "This is an ORCHID address. These addresses are used for a fixed-term experiment. \nThey should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses. \n"
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"
-	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> Printf.printf "This is a 6 to 4 address. \n Write another function to extract IPv4. \n"
+	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> Printf.printf "This is a 6 to 4 address. \nThe associated IPv4 host address is %s. \n" (extract_host addy)
 	| addy when Str.string_match (Str.regexp "^[2-3][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a global unicast address. You should be able to use whois for these. \n(RFC 3587) \n"
 	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> Printf.printf "Link Local addresses, should not be forwarded by routers. The associated mac address is %s \n" (extract_mac addy)
 	| addy when Str.string_match (Str.regexp "^FC[0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "Unique local addresses, routable only in cooperating sites. \n(RFC 4193) \n"

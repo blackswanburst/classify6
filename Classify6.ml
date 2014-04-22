@@ -147,13 +147,16 @@ let hex = divide_list lst in
 let declst = dec_list hex in
 String.concat "." declst;;
 
-(*Extract Client IPv4 Address and port*)
-(* TODO split the string into two char chunks, then concatanate with a .*)
+let pretty_print addy_str = (string_of_int (int_of_string ("0x" ^String.sub addy_str 0 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 2 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 4 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 6 2)));;
+
+(*Extract Client IPv4 Address*)
 let extract_client addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 30;
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let ob_client = String.concat "" lst in
-Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client)));;
+let long = Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client))) in
+pretty_print long;;
 
+(*Todo extract port from Teredo address*)
 
 (*Classify the address*)
 let classify s =
@@ -164,7 +167,7 @@ let classify s =
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> Printf.printf "This is the unspecified address, used for applications that do not yet know their host address. \n"
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> Printf.printf "This is the loopback address, used to route packets to the on the same host. \n"
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038) \n"
-	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6.\n The server address is %s. Add further function to extract the IPv4 address. \n" (extract_server addy)
+	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> Printf.printf "This is a Teredo address, used to map IPv4 Addresses to IPv6.\n The server address is %s. The IPv4 client address is %s. \n" (extract_server addy) (extract_client addy)
 	| addy when Str.string_match (Str.regexp "^2001:0002:") addy 0 -> Printf.printf "This is a benchmarking address. It should only be used in documentation and shouldn't be routable. \n"
 	| addy when Str.string_match (Str.regexp "^2001:001[0-9A-F]:") addy 0 -> Printf.printf "This is an ORCHID address. These addresses are used for a fixed-term experiment. \nThey should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses. \n"
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  Printf.printf "This /32 is used in documentation, and should not be seen on the internet. \n"

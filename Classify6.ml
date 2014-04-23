@@ -141,7 +141,7 @@ let rec dec_list lst = match lst with
 | h :: t -> (string_of_int (int_of_string ("0x" ^ h))) :: dec_list t;;
 
 (*extract Server IPv4 Addresses from Teredo*)
-let extract_server addy = Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 10;
+let extract_server addy = ignore (Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 10);
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let hex = divide_list lst in
 let declst = dec_list hex in
@@ -150,19 +150,19 @@ String.concat "." declst;;
 let pretty_print addy_str = (string_of_int (int_of_string ("0x" ^String.sub addy_str 0 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 2 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 4 2))) ^ "." ^ (string_of_int (int_of_string ("0x" ^String.sub addy_str 6 2)));;
 
 (*Extract Client IPv4 Address*)
-let extract_client addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 30;
+let extract_client addy = ignore (Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 30);
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let ob_client = String.concat "" lst in
 let long = Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client))) in
 pretty_print long;;
 
 (*Extract port from Teredo address*)
-let extract_port addy = Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 25;
+let extract_port addy = ignore (Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 25);
 let ob_port = Str.matched_string addy in
 Printf.sprintf "%n" ((int_of_string "0xFFFF") lxor (int_of_string ("0x" ^ ob_port)));;
 
 (*Extract IPv4 host address from 6 to 4 addresses *)
-let extract_host addy = Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 5;
+let extract_host addy = ignore (Str.string_match (Str.regexp("[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]")) addy 5);
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let hex = divide_list lst in
 let declst = dec_list hex in
@@ -173,7 +173,7 @@ let classify s =
 	let uc = (String.uppercase s) in
 	let addy = expand uc in
 	match addy with
-	| "*" -> Printf.printf "This does not appear to be an IPv6 address. \n"; exit 0
+	| "****" -> Printf.printf "This does not appear to be an IPv6 address. \n"; exit 0
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> Printf.printf "This is the unspecified address, used for applications that do not yet know their host address. \n"
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> Printf.printf "This is the loopback address, used to route packets to the on the same host. \n"
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> Printf.printf "This is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038) \n"

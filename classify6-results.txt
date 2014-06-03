@@ -1,0 +1,79 @@
+This address is not recognised 0403:9000:1000:0000:0000:0000:0000:0015
+Please contact blackswanburst@github with these details so the code can be improved.
+--------------------
+2002:CB0A:3CDD:0001:0000:0000:0000:0001 is a 6 to 4 address. 
+The associated IPv4 host address is 203.10.60.221.
+--------------------
+2001:0000:4136:E378:8000:63BF:3FFF:FDD2 is a Teredo address, used to map IPv4 Addresses to IPv6. 
+The server address is 65.54.227.120. The IPv4 client address is 192.0.2.45 and the port is 40000.
+--------------------
+0000:0000:0000:0000:0000:0000:FFFF:192.0.2.47 is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. 
+(RFC 4038)
+--------------------
+FE8F:0DB8:0001:0002:020C:29FF:FE0C:47D5 is a Link Local address, and should not be forwarded by routers. 
+The associated mac address is 00:C3:29:0C:47:D5.
+--------------------
+2A02:2F0C:8000:0019:0062:0231:0075:0133 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2A03:0280:0000:0001:0000:0000:0000:0001 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2403:9000:1000:0000:0000:0000:0000:0015 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2A01:7E00:0000:0000:0000:0000:0020:DEED is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+FF5F:0311:C05A:C9FA:3043:3CFF:FEF2:E00D is a global multicast address.
+--------------------
+FFAD:4C39:33E4:2639:351F:F6FF:FE69:C0FF is a global multicast address.
+--------------------
+FF81:134F:52D5:8E94:A556:BCFF:FE69:3F63 is a global multicast address.
+--------------------
+FE80:0000:0000:0000:0200:5AEE:FEAA:20A2 is a Link Local address, and should not be forwarded by routers. 
+The associated mac address is not discernable from this address.
+.
+--------------------
+2001:0002:006C:0000:0000:0000:0000:0430 is a benchmarking address. It should only be used in documentation and shouldn't be routable.
+--------------------
+2001:0010:0240:00AB:0000:0000:0000:000A is an ORCHID address. These addresses are used for a fixed-term experiment. 
+They should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses.
+--------------------
+FF01:0000:0000:0000:0000:0000:0000:0002 is a global multicast address.
+--------------------
+FF01:0000:0000:0000:0000:0000:0000:0002 is a global multicast address.
+--------------------
+2A01:0270:0000:666F:0000:0000:0000:0001 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:0820:0002:0000:0000:0000:0000:0006 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:06B0:000E:2018:0000:0000:0000:0172 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:0708:0040:2001:A822:BAFF:FEC4:2428 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:41C8:0000:03EE:0000:0000:0000:0002 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:4800:7802:0053:0000:0000:0000:B075 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2620:0000:0861:0052:0208:0080:0155:0068 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2610:0150:2C68:0000:0000:00D0:0DAB:1DE5 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:16D8:C002:0000:0000:0000:0000:0046 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+2001:16D8:0000:0000:0000:0000:0000:0046 is a global unicast address. You should be able to use whois for these. 
+(RFC 3587)
+--------------------
+FDF8:F53B:82E4:0000:0000:0000:0000:0053 is a Probabilistically unique local addresses, routable only in cooperating sites. 
+(RFC 4193 section 3.2)
+--------------------

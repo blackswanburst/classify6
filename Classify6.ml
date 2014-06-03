@@ -167,7 +167,6 @@ let declst = dec_list hex in
 String.concat "." declst;;
 
 (*Classify the address*)
-(* TODO: Stop printing as a side effect*)
 let classify s =
 	let uc = (String.uppercase s) in
 	let addy = expand uc in
@@ -175,12 +174,16 @@ let classify s =
 	| "****" -> "This does not appear to be an IPv6 address."
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> addy ^ " is the unspecified address, used for applications that do not yet know their host address."
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> addy ^ " is the loopback address, used to route packets to the on the same host."
-	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038)"
-	(* 0403 case needs to go here *) 
+	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is an IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038)"
+	| addy when Str.string_match (Str.regexp "^01[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /8 discard only address block. \n(RFC 6666)"
+	| addy when Str.string_match (Str.regexp "^0[2-3][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Deprecated (2004) /7, previously it was OSI NSAP-mapped prefix (RFC 4548) \n(RFC 4048)"
+	| addy when Str.string_match (Str.regexp "^0[4-7][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /6. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^0[8-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /5. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^1[0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /4. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^2001:0000:") addy 0 -> addy ^ " is a Teredo address, used to map IPv4 Addresses to IPv6. \nThe server address is " ^ (extract_server addy) ^ ". The IPv4 client address is " ^ (extract_client addy) ^ " and the port is " ^ (extract_port addy) ^ "."   
 	| addy when Str.string_match (Str.regexp "^2001:0002:") addy 0 -> addy ^ " is a benchmarking address. It should only be used in documentation and shouldn't be routable."
 	| addy when Str.string_match (Str.regexp "^2001:001[0-9A-F]:") addy 0 -> addy ^ " is an ORCHID address. These addresses are used for a fixed-term experiment. \nThey should only be visible on an end-to-end basis and routers should not see packets using them as source or destination addresses."
-	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  addy ^ " /32 is used in documentation, and should not be seen on the internet."
+	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  addy ^ " is from a /32 is used in documentation, and should not be seen on the internet."
 	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> addy ^ " is a 6 to 4 address. \nThe associated IPv4 host address is " ^ (extract_host addy) ^ "."
 	| addy when Str.string_match (Str.regexp "^[2-3][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global unicast address. You should be able to use whois for these. \n(RFC 3587)"
 	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> addy ^ " is a Link Local address, and should not be forwarded by routers. \nThe associated mac address is " ^ (extract_mac addy) ^ "."
@@ -230,9 +233,8 @@ let speclist = [
 ]
 in let usage_msg = "classify6 is a command line tool to tell you more about an IPv6 address or addresses. Options available:"
 in Arg.parse speclist print_endline usage_msg;
-(*TODO Handle Output file once classify returns strings
-if !batch_mode then let filename = !in_file in
-	let oc = open_out !out_file in
+(*if !batch_mode then let filename = !in_file in
+	let oc = (open_out !out_file) in
 	Printf.fprintf oc "%s\n" (process_file filename);
 	close_out oc;*)
 if !batch_mode then let filename = !in_file in

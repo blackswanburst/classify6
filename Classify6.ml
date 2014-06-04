@@ -193,6 +193,7 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^FD[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a Probabilistically unique local addresses, routable only in cooperating sites. \n(RFC 4193 section 3.2)"
 	| addy when Str.string_match (Str.regexp "^FE[[0-7][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /9. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> addy ^ " is a Link Local address, and should not be forwarded by routers. \nThe associated mac address is " ^ (extract_mac addy) ^ "."
+	| addy when Str.string_match (Str.regexp "^FE[C-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /10, now Deprecated. \n(RFC 3879)"
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global multicast address."
 	| _ -> "This address is not recognised " ^ addy ^ "\nPlease contact blackswanburst@github with these details so the code can be improved.";;
 

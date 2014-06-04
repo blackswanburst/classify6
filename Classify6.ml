@@ -126,12 +126,7 @@ let new_lst = divide_list lst in
 let ans = List.filter filter new_lst in
 String.concat ":" ans
 else
-"not discernable from this address.\n";;
-
-(*A 64-bit interface identifier is most commonly derived from its 48-bit MAC address. A MAC address 00:0C:29:0C:47:D5 is turned into a 64-bit EUI-64 by inserting FF:FE in the middle: 
-	00:0C:29:FF:FE:0C:47:D5. When this EUI-64 is used to form an IPv6 address it is modified:[1] the meaning of the Universal/Local bit (the 7th most significant bit of the EUI-64, starting 
-	from 1) is inverted, so that a 1 now means Universal. To create an IPv6 address with the network prefix 2001:db8:1:2::/64 it yields the address 2001:db8:1:2:020c:29ff:fe0c:47d5 (with the 
-	underlined U/L bit inverted to a 1, because the MAC address is universally unique).*)
+"not discernable from this address";;
 
 (* Turn a list of hex strings into their decimal equivalent*)
 let rec dec_list lst = match lst with
@@ -186,9 +181,18 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^2001:0DB8:") addy 0 ->  addy ^ " is from a /32 is used in documentation, and should not be seen on the internet."
 	| addy when Str.string_match (Str.regexp "^2002:") addy 0 -> addy ^ " is a 6 to 4 address. \nThe associated IPv4 host address is " ^ (extract_host addy) ^ "."
 	| addy when Str.string_match (Str.regexp "^[2-3][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global unicast address. You should be able to use whois for these. \n(RFC 3587)"
-	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> addy ^ " is a Link Local address, and should not be forwarded by routers. \nThe associated mac address is " ^ (extract_mac addy) ^ "."
+	| addy when Str.string_match (Str.regexp "^[4-5][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /3. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^[6-7][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /3. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^[8-9][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /3. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^[A-B][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /3. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^[C-D][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /3. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^E[0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /4. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^F[0-7][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /5. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^F[8-9A-B][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /6. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^FC[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is an Unique local addresses, routable only in cooperating sites. \n(RFC 4193)"
 	| addy when Str.string_match (Str.regexp "^FD[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a Probabilistically unique local addresses, routable only in cooperating sites. \n(RFC 4193 section 3.2)"
+	| addy when Str.string_match (Str.regexp "^FE[[0-7][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /9. \n(RFC 4291)"
+	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> addy ^ " is a Link Local address, and should not be forwarded by routers. \nThe associated mac address is " ^ (extract_mac addy) ^ "."
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global multicast address."
 	| _ -> "This address is not recognised " ^ addy ^ "\nPlease contact blackswanburst@github with these details so the code can be improved.";;
 
@@ -237,6 +241,7 @@ in Arg.parse speclist print_endline usage_msg;
 	let oc = (open_out !out_file) in
 	Printf.fprintf oc "%s\n" (process_file filename);
 	close_out oc;*)
+(* TODO Output to a file specified at the CLI*)
 if !batch_mode then let filename = !in_file in
 	process_file filename;
 else

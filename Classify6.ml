@@ -13,7 +13,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.*)
 
-(*ocamlc -g str.cma Classify6.ml -o classify6*)
+(*To compile for bytecode for usage with ocamlrun:
+ocamlc -g str.cma Classify6.ml -o classify6
+or to compile natively:
+ocamlopt str.cmxa Classify6.ml -o classify6
+*)
 
 (*Load necessary modules*)
 
@@ -166,10 +170,11 @@ let classify s =
 	let uc = (String.uppercase s) in
 	let addy = expand uc in
 	match addy with
-	| "****" -> "This does not appear to be an IPv6 address."
+	| "****" -> "This does not appear to be an IPv6 address. Did you forget to add the -a option?"
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> addy ^ " is the unspecified address, used for applications that do not yet know their host address."
 	| "0000:0000:0000:0000:0000:0000:0000:0001" -> addy ^ " is the loopback address, used to route packets to the on the same host."
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is an IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038)"
+	| addy when Str.string_match (Str.regexp "^00[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /8 for unspecified addresses. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^01[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /8 discard only address block. \n(RFC 6666)"
 	| addy when Str.string_match (Str.regexp "^0[2-3][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Deprecated (2004) /7, previously it was OSI NSAP-mapped prefix (RFC 4548) \n(RFC 4048)"
 	| addy when Str.string_match (Str.regexp "^0[4-7][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /6. \n(RFC 4291)"
@@ -197,32 +202,38 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global multicast address."
 	| _ -> "This address is not recognised " ^ addy ^ "\nPlease contact blackswanburst@github with these details so the code can be improved.";;
 
-(*functions req'd for batch mode*)
-let process_line line =
-	print_endline (classify line);
-	print_endline "--------------------";;
+let batch_mode = ref false
+let in_file = ref "classify6-unit-test.txt"
+let out_file = ref "classify6-results.txt"
+let address = ref "****"
 
-let process_lines lines =
-	Stream.iter process_line lines;;
+(*functions req'd for batch mode*)
 
 let line_stream_of_channel channel =
 	Stream.from
 		(fun _ ->
 			try Some (input_line channel) with End_of_file -> None);;
 
-let process_file in_file =
-	let in_channel = open_in in_file in
-		try
-			process_lines (line_stream_of_channel in_channel);
-			close_in in_channel
-		with e ->
-			close_in in_channel;
-			raise e;;
+let write channel line =
+	(* Write message to file *)
+	Printf.fprintf channel "%s\n" (classify line);
+	Printf.fprintf channel "%s\n" "---------------------------------------------------------------------------------------------------";;
 
-let batch_mode = ref false
-let in_file = ref "classify6-unit-test.txt"
-let out_file = ref "classify6-results.txt"
-let address = ref "foo"
+let output in_file out_file = 
+let in_channel = open_in in_file in
+let out_channel = open_out out_file in 
+try
+	Stream.iter
+	(fun line ->
+		(*Write line to outfile *)
+		write out_channel line)
+	(line_stream_of_channel in_channel);
+	close_in in_channel;
+	close_out out_channel;
+with e ->
+	close_in in_channel;
+	close_out out_channel;
+	raise e;;
 
 let set_infile f = in_file := f
 let set_outfile f = out_file := f
@@ -232,22 +243,17 @@ let main =
 begin
 let speclist = [
 ("-a", Arg.String (set_address), "The single IPv6 address to check");
-("-b", Arg.Set batch_mode, "Sets batch mode, must use -f to provide input filename and -o to use output filename.");
-("-f", Arg.String (set_infile), "Sets input file of IPv6 Addresses (one per line)");
+("-b", Arg.Set batch_mode, "Sets batch mode, must use -i to provide input filename and -o to use output filename.");
+("-i", Arg.String (set_infile), "Sets input file of IPv6 Addresses (one per line)");
 ("-o", Arg.String (set_outfile), "Sets output file of IPv6 Address classifications")
 ]
 in let usage_msg = "classify6 is a command line tool to tell you more about an IPv6 address or addresses. Options available:"
 in Arg.parse speclist print_endline usage_msg;
-(*if !batch_mode then let filename = !in_file in
-	let oc = (open_out !out_file) in
-	Printf.fprintf oc "%s\n" (process_file filename);
-	close_out oc;*)
-(* TODO Output to a file specified at the CLI*)
-if !batch_mode then let filename = !in_file in
-	process_file filename;
+if !batch_mode then
+	output !in_file !out_file
 else
 	let addy = !address in
-	print_endline (classify addy); 
+	print_endline (classify addy);
 end
 
 let () = main

@@ -7,6 +7,7 @@ Thanks to Yvan Jannsens for exploring easy deployment options for testers:
 
 apt-get install ocaml git-core                  
 git clone https://github.com/blackswanburst/classify6.git
+cd classify6
 ocamlopt str.cmxa Classify6.ml -o classify6 
 
 To compile for bytecode for usage with ocamlrun:

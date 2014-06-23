@@ -172,7 +172,7 @@ let classify s =
 	match addy with
 	| "****" -> "This does not appear to be an IPv6 address. Did you forget to add the -a option?"
 	| "0000:0000:0000:0000:0000:0000:0000:0000" -> addy ^ " is the unspecified address, used for applications that do not yet know their host address."
-	| "0000:0000:0000:0000:0000:0000:0000:0001" -> addy ^ " is the loopback address, used to route packets to the on the same host."
+	| "0000:0000:0000:0000:0000:0000:0000:0001" -> addy ^ " is the loopback address, used to route packets to on the same host."
 	| addy when Str.string_match (Str.regexp "^0000:0000:0000:0000:0000:0000:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is an IPv4 Mapped Address used for dual stack transition, you should see the IPv4 Address at the end. \n(RFC 4038)"
 	| addy when Str.string_match (Str.regexp "^00[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /8 for unspecified addresses. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^01[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /8 discard only address block. \n(RFC 6666)"
@@ -199,7 +199,12 @@ let classify s =
 	| addy when Str.string_match (Str.regexp "^FE[[0-7][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /9. \n(RFC 4291)"
 	| addy when Str.string_match (Str.regexp "^FE[8-9A-B][0-9A-F]:") addy 0 -> addy ^ " is a Link Local address, and should not be forwarded by routers. \nThe associated mac address is " ^ (extract_mac addy) ^ "."
 	| addy when Str.string_match (Str.regexp "^FE[C-F][0-9A-F]:") addy 0 -> addy ^ " is from an IETF Reserved /10, now Deprecated. \n(RFC 3879)"
-	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a global multicast address."
+	| addy when Str.string_match (Str.regexp "^FF01:") addy 0 -> addy ^ " is an node local scope multicast address."
+	| addy when Str.string_match (Str.regexp "^FF02:") addy 0 -> addy ^ " is a link local scope multicast address."
+	| addy when Str.string_match (Str.regexp "^FF05:") addy 0 -> addy ^ " is a site local scope multicast address."
+	| addy when Str.string_match (Str.regexp "^FF0[0-9A-F]:") addy 0 -> addy ^ " is a variable scope multicast address."
+	| addy when Str.string_match (Str.regexp "^FF3[0-9A-F]:") addy 0 -> addy ^ " is a source specific multicast address."
+	| addy when Str.string_match (Str.regexp "^FF[0-9A-F][0-9A-F]:") addy 0 -> addy ^ " is a multicast address."
 	| _ -> "This address is not recognised " ^ addy ^ "\nPlease contact blackswanburst@github with these details so the code can be improved.";;
 
 let batch_mode = ref false

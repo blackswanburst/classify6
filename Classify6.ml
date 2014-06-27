@@ -150,7 +150,7 @@ let pretty_print addy_str = (string_of_int (int_of_string ("0x" ^String.sub addy
 let extract_client addy = ignore (Str.string_match (Str.regexp "[0-9A-F][0-9A-F][0-9A-F][0-9A-F]:[0-9A-F][0-9A-F][0-9A-F][0-9A-F]") addy 30);
 let lst = Str.split (Str.regexp ":") (Str.matched_string addy) in
 let ob_client = String.concat "" lst in
-let long = Printf.sprintf "%X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client))) in
+let long = Printf.sprintf "%08X" ((int_of_string "0xFFFFFFFF") lxor (int_of_string ("0x" ^ ob_client))) in
 pretty_print long;;
 
 (*Extract port from Teredo address*)

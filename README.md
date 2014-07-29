@@ -2,22 +2,20 @@ classify6
 
 An OCAML command line tool to classify IPv6 addresses, and provide a bit of further information.
 
-Thanks to Yvan Jannsens for exploring easy deployment options for testers:
+Easy deployment options for testers:
 
 apt-get install ocaml git-core											
 git clone https://github.com/blackswanburst/classify6.git				
-cd classify6															
-ocamlopt str.cmxa Classify6.ml -o classify6								
+cd classify6																							
 
 To compile for bytecode for usage with ocamlrun:
-ocamlc -g str.cma Classify6.ml -o classify6								
+ocamlbuild Classify6.byte								
 or to compile natively:
-ocamlopt str.cmxa Classify6.ml -o classify6								
-
-Build environment to make the ocaml easily portable.
+ocamlbuild Classify6.native								
 
 How could you help? 
 
 Review the IPv6 assisgments with your expertise, and test the code.
 Report bugs, find better modes of deployment, propose features, and give feedback.
 
+Thanks to Yvann Janssens and Ehab Hussein, for useful feedback. Thanks to the Real World OCAML authors for sparking the interest.

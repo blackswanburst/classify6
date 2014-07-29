@@ -14,8 +14,6 @@ ocamlc -g str.cma Classify6.ml -o classify6
 or to compile natively:
 ocamlopt str.cmxa Classify6.ml -o classify6								
 
-TODO: Add multicasts of different scopes and specificity.
-
 Build environment to make the ocaml easily portable.
 
 How could you help? 
